@@ -50,6 +50,16 @@ class _HomePageState extends State<HomePage> {
 
   List<PlatformFile>? _files;
 
+  List<String> colorList = [
+    'Orange',
+    'Yellow',
+    'Pink',
+    'White',
+    'Red',
+    'Black',
+    'Green'
+  ];
+
   void _openFileExplorer() async {
     _files = (await FilePicker.platform.pickFiles(
             type: FileType.custom,
@@ -107,6 +117,12 @@ class _HomePageState extends State<HomePage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+  // void _showList() {
+  //   Future<String> _askFavColor() async {
+  //     return
+  //   }
+  // }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -156,13 +172,28 @@ class _HomePageState extends State<HomePage> {
                         context: context,
                         builder: (context) {
                           return AlertDialog(
-                            content: Text(myController.text),
+                            title: Text(myController.text),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context, 'OK'),
                                 child: const Text('OK'),
                               ),
                             ],
+                            content: Container(
+                              width: double.minPositive,
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: colorList.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return ListTile(
+                                    title: Text(colorList[index]),
+                                    onTap: () {
+                                      Navigator.pop(context, colorList[index]);
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
                           );
                         },
                       );
