@@ -15,14 +15,24 @@ class Page extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[100],
-      appBar: AppBar(
-        title: Text("DocApp"),
-        backgroundColor: Colors.blue[600],
-        centerTitle: true,
-      ),
-      body: HomePage(),
-    );
+        backgroundColor: Colors.blue[100],
+        appBar: AppBar(
+          title: Text("DocApp"),
+          backgroundColor: Colors.blue[600],
+          centerTitle: true,
+        ),
+        body: HomePage(),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SecondRoute()),
+            );
+          },
+          label: const Text('Search'),
+          icon: const Icon(Icons.search),
+          backgroundColor: Colors.blue[700],
+        ));
   }
 }
 
@@ -33,32 +43,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // String _name;
+  // String _search_name;
+  // String _file_path;
+
   final ButtonStyle style =
       ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
 
   final GlobalKey<ScaffoldState> _scaffoldstate =
       new GlobalKey<ScaffoldState>();
 
-  final myController = TextEditingController();
-
-  @override
-  void dispose() {
-    // Clean up the controller when the widget is disposed.
-    myController.dispose();
-    super.dispose();
-  }
-
   List<PlatformFile>? _files;
-
-  List<String> colorList = [
-    'Orange',
-    'Yellow',
-    'Pink',
-    'White',
-    'Red',
-    'Black',
-    'Green'
-  ];
 
   void _openFileExplorer() async {
     _files = (await FilePicker.platform.pickFiles(
@@ -117,11 +112,25 @@ class _HomePageState extends State<HomePage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  // void _showList() {
-  //   Future<String> _askFavColor() async {
-  //     return
-  //   }
-  // }
+  Widget userNameParam() {
+    return TextFormField(
+      decoration: InputDecoration(
+        border: UnderlineInputBorder(),
+        labelText: 'Enter your Name',
+      ),
+      validator: (String? value) {
+        if (value == null || value.isEmpty) {
+          return 'Entered Name is None';
+        }
+
+        return null;
+      },
+      onSaved: (String? value) {
+        // _name = value;
+        print(value);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -130,26 +139,22 @@ class _HomePageState extends State<HomePage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: TextField(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Enter a search term',
-              ),
-              controller: myController,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: TextFormField(
-              textAlign: TextAlign.center,
-              decoration: InputDecoration(
-                border: UnderlineInputBorder(),
-                labelText: 'Enter your Name',
-              ),
-            ),
-          ),
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: userNameParam()),
           const SizedBox(height: 30),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+            child: Expanded(
+              child: ElevatedButton(
+                style: style,
+                onPressed: _openFileExplorer,
+                child: Text('Upload File'),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 15,
+          ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
             child: Row(
@@ -158,55 +163,135 @@ class _HomePageState extends State<HomePage> {
                   child: ElevatedButton(
                     style: style,
                     onPressed: _openFileExplorer,
-                    child: Text('Upload'),
+                    child: Text('Save Data'),
                   ),
                 ),
-                SizedBox(
-                  width: 5,
-                ),
-                Expanded(
-                  child: ElevatedButton(
-                    style: style,
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text(myController.text),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, 'OK'),
-                                child: const Text('OK'),
-                              ),
-                            ],
-                            content: Container(
-                              width: double.minPositive,
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: colorList.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return ListTile(
-                                    title: Text(colorList[index]),
-                                    onTap: () {
-                                      Navigator.pop(context, colorList[index]);
-                                    },
-                                  );
-                                },
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    child: Text('Search'),
-                  ),
-                )
               ],
             ),
           ),
           SizedBox(
             height: 10,
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class SecondRoute extends StatelessWidget {
+  const SecondRoute({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.blue[100],
+      appBar: AppBar(
+        title: Text("DocApp"),
+        backgroundColor: Colors.blue[600],
+        centerTitle: true,
+      ),
+      body: SecondPage(),
+    );
+  }
+}
+
+class SecondPage extends StatefulWidget {
+  const SecondPage({Key? key}) : super(key: key);
+
+  @override
+  _SecondPageState createState() => _SecondPageState();
+}
+
+class _SecondPageState extends State<SecondPage> {
+  final ButtonStyle style =
+      ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
+  List<String> colorList = [
+    'Orange',
+    'Yellow',
+    'Pink',
+    'White',
+    'Red',
+    'Black',
+    'Green'
+  ];
+
+  final myController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    myController.dispose();
+    super.dispose();
+  }
+
+  Widget searchParams() {
+    return TextFormField(
+      decoration: InputDecoration(
+        border: OutlineInputBorder(),
+        hintText: 'Enter a search term',
+      ),
+      controller: myController,
+      validator: (String? value) {
+        if (value == null || value.isEmpty) {
+          return 'Search Parameter is None';
+        }
+
+        return null;
+      },
+      onSaved: (String? value) {
+        // _name = value;
+        print(value);
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: searchParams()),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+            child: ElevatedButton(
+              style: style,
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text(myController.text),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, 'OK'),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                      content: Container(
+                        width: double.minPositive,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: colorList.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return ListTile(
+                              title: Text(colorList[index]),
+                              onTap: () {
+                                Navigator.pop(context, colorList[index]);
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Text('Search'),
+            ),
+          )
         ],
       ),
     );
