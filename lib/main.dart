@@ -15,24 +15,25 @@ class Page extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.blue[100],
-        appBar: AppBar(
-          title: Text("DocApp"),
-          backgroundColor: Colors.blue[600],
-          centerTitle: true,
-        ),
-        body: HomePage(),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SecondRoute()),
-            );
-          },
-          label: const Text('Search'),
-          icon: const Icon(Icons.search),
-          backgroundColor: Colors.blue[700],
-        ));
+      backgroundColor: Colors.blue[100],
+      appBar: AppBar(
+        title: Text("DocApp"),
+        backgroundColor: Colors.blue[600],
+        centerTitle: true,
+      ),
+      body: HomePage(),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SecondRoute()),
+          );
+        },
+        label: const Text('Search'),
+        icon: const Icon(Icons.search),
+        backgroundColor: Colors.blue[700],
+      ),
+    );
   }
 }
 
@@ -44,8 +45,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // String _name;
-  // String _search_name;
-  // String _file_path;
 
   final ButtonStyle style =
       ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
@@ -74,22 +73,6 @@ class _HomePageState extends State<HomePage> {
     //   } else {
     //     print('Something went wrong!');
     //   }
-  }
-
-  Widget setupAlertDialoadContainer() {
-    return Container(
-      height: 300.0, // Change as per your requirement
-      width: 300.0, // Change as per your requirement
-      child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: 5,
-        itemBuilder: (BuildContext context, int index) {
-          return ListTile(
-            title: Text('Gujarat, India'),
-          );
-        },
-      ),
-    );
   }
 
   void _showSnackBar(String msg) {
@@ -184,14 +167,24 @@ class SecondRoute extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[100],
-      appBar: AppBar(
-        title: Text("DocApp"),
-        backgroundColor: Colors.blue[600],
-        centerTitle: true,
-      ),
-      body: SecondPage(),
-    );
+        backgroundColor: Colors.blue[100],
+        appBar: AppBar(
+          title: Text("DocApp"),
+          backgroundColor: Colors.blue[600],
+          centerTitle: true,
+        ),
+        body: SecondPage(),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Page()),
+            );
+          },
+          label: const Text('Go Back'),
+          icon: const Icon(Icons.arrow_left),
+          backgroundColor: Colors.blue[700],
+        ));
   }
 }
 
