@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MaterialApp(
@@ -16,7 +18,7 @@ class Page extends StatelessWidget {
       backgroundColor: Colors.blue[100],
       appBar: AppBar(
         title: Text("DocApp"),
-        backgroundColor: Colors.teal[900],
+        backgroundColor: Colors.blue[600],
         centerTitle: true,
       ),
       body: HomePage(),
@@ -33,6 +35,49 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final ButtonStyle style =
       ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
+
+  final GlobalKey<ScaffoldState> _scaffoldstate =
+      new GlobalKey<ScaffoldState>();
+
+  List<PlatformFile>? _files;
+
+  void _openFileExplorer() async {
+    _files = (await FilePicker.platform.pickFiles(
+            type: FileType.custom,
+            allowMultiple: false,
+            allowedExtensions: ['pdf', 'doc', 'docx', 'txt']))!
+        .files;
+
+    print('Loaded file path is : ${_files!.first.path}');
+    _showSnackBar("File Uploaded");
+    var uri = Uri.parse('http://192.168.56.1:8080/test');
+    var request = http.MultipartRequest('POST', uri);
+    request.files.add(await http.MultipartFile.fromPath(
+        'file', _files!.first.path.toString()));
+    var response = await request.send();
+    if (response.statusCode == 200) {
+      print('Uploaded ...');
+    } else {
+      print('Something went wrong!');
+    }
+  }
+
+  void _showSnackBar(String msg) {
+    final snackBar = SnackBar(
+      content: Text(msg),
+      backgroundColor: Colors.green[800],
+      behavior: SnackBarBehavior.floating,
+      duration: const Duration(seconds: 2),
+      action: SnackBarAction(
+          label: 'Done',
+          textColor: Colors.white,
+          onPressed: () {
+            print('Done pressed!');
+          }),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,24 +107,41 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 30),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: ElevatedButton(
-              style: style,
-              onPressed: () {},
-              child: Text('Upload Data'),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: style,
+                    onPressed: _openFileExplorer,
+                    child: Text('Upload'),
+                  ),
+                ),
+                SizedBox(
+                  width: 5,
+                ),
+                Expanded(
+                  child: ElevatedButton(
+                    style: style,
+                    onPressed: () {},
+                    child: Text('Search '),
+                  ),
+                )
+              ],
             ),
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: ElevatedButton(
-              style: style,
-              onPressed: () {},
-              child: Text('Search Document'),
-            ),
+          SizedBox(
+            height: 10,
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            // child: asf(),
-          )
+          // Padding(
+          //   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+          //   child: Expanded(
+          //     child: ElevatedButton(
+          //       style: style,
+          //       onPressed: _openFileExplorer,
+          //       child: Text('Upload File'),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
