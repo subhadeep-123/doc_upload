@@ -39,6 +39,15 @@ class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldstate =
       new GlobalKey<ScaffoldState>();
 
+  final myController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    myController.dispose();
+    super.dispose();
+  }
+
   List<PlatformFile>? _files;
 
   void _openFileExplorer() async {
@@ -50,27 +59,46 @@ class _HomePageState extends State<HomePage> {
 
     print('Loaded file path is : ${_files!.first.path}');
     _showSnackBar("File Uploaded");
-    var uri = Uri.parse('http://192.168.56.1:8080/test');
-    var request = http.MultipartRequest('POST', uri);
-    request.files.add(await http.MultipartFile.fromPath(
-        'file', _files!.first.path.toString()));
-    var response = await request.send();
-    if (response.statusCode == 200) {
-      print('Uploaded ...');
-    } else {
-      print('Something went wrong!');
-    }
+    //   var uri = Uri.parse('http://192.168.56.1:8080/test');
+    //   var request = http.MultipartRequest('POST', uri);
+    //   request.files.add(await http.MultipartFile.fromPath(
+    //       'file', _files!.first.path.toString()));
+    //   var response = await request.send();
+    //   if (response.statusCode == 200) {
+    //     print('Uploaded ...');
+    //   } else {
+    //     print('Something went wrong!');
+    //   }
+  }
+
+  Widget setupAlertDialoadContainer() {
+    return Container(
+      height: 300.0, // Change as per your requirement
+      width: 300.0, // Change as per your requirement
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: 5,
+        itemBuilder: (BuildContext context, int index) {
+          return ListTile(
+            title: Text('Gujarat, India'),
+          );
+        },
+      ),
+    );
   }
 
   void _showSnackBar(String msg) {
     final snackBar = SnackBar(
-      content: Text(msg),
-      backgroundColor: Colors.green[800],
+      content: Text(
+        msg,
+        style: TextStyle(color: Colors.black),
+      ),
+      backgroundColor: Colors.blue[300],
       behavior: SnackBarBehavior.floating,
       duration: const Duration(seconds: 2),
       action: SnackBarAction(
           label: 'Done',
-          textColor: Colors.white,
+          textColor: Colors.black,
           onPressed: () {
             print('Done pressed!');
           }),
@@ -92,6 +120,7 @@ class _HomePageState extends State<HomePage> {
                 border: OutlineInputBorder(),
                 hintText: 'Enter a search term',
               ),
+              controller: myController,
             ),
           ),
           Padding(
@@ -122,8 +151,23 @@ class _HomePageState extends State<HomePage> {
                 Expanded(
                   child: ElevatedButton(
                     style: style,
-                    onPressed: () {},
-                    child: Text('Search '),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            content: Text(myController.text),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, 'OK'),
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: Text('Search'),
                   ),
                 )
               ],
@@ -132,16 +176,6 @@ class _HomePageState extends State<HomePage> {
           SizedBox(
             height: 10,
           ),
-          // Padding(
-          //   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          //   child: Expanded(
-          //     child: ElevatedButton(
-          //       style: style,
-          //       onPressed: _openFileExplorer,
-          //       child: Text('Upload File'),
-          //     ),
-          //   ),
-          // ),
         ],
       ),
     );
