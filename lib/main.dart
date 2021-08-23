@@ -187,28 +187,8 @@ class SecondPage extends StatefulWidget {
 class _SecondPageState extends State<SecondPage> {
   final ButtonStyle style =
       ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
-  List<String> colorList = [
-    'Orange',
-    'Yellow',
-    'Pink',
-    'White',
-    'Red',
-    'Black',
-    'Green'
-  ];
 
   TextEditingController SearchController = TextEditingController();
-  Future personData() async {
-    var url = "http://192.168.0.101/doc_uploaded_backend/viewData.php";
-    var response = await http.get(Uri.parse(url));
-    return json.decode(response.body);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    personData();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -231,34 +211,11 @@ class _SecondPageState extends State<SecondPage> {
             child: ElevatedButton(
               style: style,
               onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: Text(SearchController.text),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, 'OK'),
-                          child: const Text('OK'),
-                        ),
-                      ],
-                      content: Container(
-                        width: double.minPositive,
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: colorList.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return ListTile(
-                              title: Text(colorList[index]),
-                              onTap: () {
-                                Navigator.pop(context, colorList[index]);
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    );
-                  },
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ListDataPage(SearchController.text),
+                  ),
                 );
               },
               child: Text('Search'),
@@ -267,5 +224,74 @@ class _SecondPageState extends State<SecondPage> {
         ],
       ),
     );
+  }
+}
+
+class ListDataPage extends StatefulWidget {
+  final String previousPageValue;
+  const ListDataPage(this.previousPageValue);
+
+  @override
+  _ListDataPageState createState() =>
+      _ListDataPageState(this.previousPageValue);
+}
+
+class _ListDataPageState extends State<ListDataPage> {
+  String previousPageValue;
+  _ListDataPageState(this.previousPageValue);
+
+  List listResponse = [];
+
+  Future fetchData() async {
+    var url = "http://192.168.0.101/fetch?uname=$previousPageValue";
+    var response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      setState(() {
+        listResponse = json.decode(response.body);
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    fetchData();
+    super.initState();
+    print(listResponse);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        backgroundColor: Colors.blue[100],
+        appBar: AppBar(
+          title: Text("DocApp - Search Data"),
+          backgroundColor: Colors.blue[600],
+          centerTitle: true,
+        ),
+        body: SafeArea(
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: listResponse.length,
+            itemBuilder: (BuildContext context, int index) {
+              return ListTile(
+                title: Text(listResponse[index]),
+                onTap: () {
+                  Navigator.pop(context, listResponse[index]);
+                },
+              );
+            },
+          ),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SecondRoute()),
+            );
+          },
+          label: const Text('Go Back'),
+          icon: const Icon(Icons.arrow_left),
+          backgroundColor: Colors.blue[700],
+        ));
   }
 }
