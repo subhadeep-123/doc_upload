@@ -76,9 +76,11 @@ class _HomePageState extends State<HomePage> {
   List<PlatformFile>? _files;
 
   Future uploadFile() async {
-    var uri = Uri.parse('http://192.168.0.101/doc_uploaded_backend/upload.php');
+    var filename = (_files!.first.path.toString().split('/').last);
+    print(filename);
+    var uri = Uri.parse(
+        'http://192.168.0.101/upload?uname=${nameController.text}&fname=${filename}');
     var request = http.MultipartRequest('POST', uri);
-    request.fields['name'] = nameController.text;
     request.files.add(await http.MultipartFile.fromPath(
         'file', _files!.first.path.toString()));
     var response = await request.send();
