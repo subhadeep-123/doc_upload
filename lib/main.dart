@@ -1,6 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -44,40 +45,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // final String _name;
-  // final String _email;
-  var _name;
-  var _email;
+  TextEditingController nameController = TextEditingController();
 
   final ButtonStyle style =
       ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
 
   final GlobalKey<ScaffoldState> _scaffoldstate =
       new GlobalKey<ScaffoldState>();
-  final _formKey = GlobalKey<FormState>();
-
-  List<PlatformFile>? _files;
-
-  void _openFileExplorer() async {
-    _files = (await FilePicker.platform.pickFiles(
-            type: FileType.custom,
-            allowMultiple: false,
-            allowedExtensions: ['pdf', 'doc', 'docx', 'txt']))!
-        .files;
-
-    print('Loaded file path is : ${_files!.first.path}');
-    _showSnackBar("File Uploaded");
-    //   var uri = Uri.parse('http://192.168.56.1:8080/test');
-    //   var request = http.MultipartRequest('POST', uri);
-    //   request.files.add(await http.MultipartFile.fromPath(
-    //       'file', _files!.first.path.toString()));
-    //   var response = await request.send();
-    //   if (response.statusCode == 200) {
-    //     print('Uploaded ...');
-    //   } else {
-    //     print('Something went wrong!');
-    //   }
-  }
 
   void _showSnackBar(String msg) {
     final snackBar = SnackBar(
@@ -99,71 +73,61 @@ class _HomePageState extends State<HomePage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  Widget _buildName() {
-    return TextFormField(
-      decoration: InputDecoration(
-        border: UnderlineInputBorder(),
-        labelText: 'Enter your Name',
-      ),
-      validator: (String? value) {
-        if (value == null || value.isEmpty) {
-          return 'Entered Name is None';
-        }
+  List<PlatformFile>? _files;
 
-        return null;
-      },
-      onSaved: (String? value) {
-        _name = value;
-        // print(value);
-      },
-    );
+  Future uploadFile() async {
+    var uri = Uri.parse('http://192.168.0.101/doc_uploaded_backend/upload.php');
+    var request = http.MultipartRequest('POST', uri);
+    request.fields['name'] = nameController.text;
+    request.files.add(await http.MultipartFile.fromPath(
+        'file', _files!.first.path.toString()));
+    var response = await request.send();
+    if (response.statusCode == 200) {
+      _showSnackBar("Image Uploaded");
+    } else {
+      _showSnackBar('Something went wrong!');
+    }
+    setState(() {});
   }
 
-  Widget _buildEmail() {
-    return TextFormField(
-      decoration: InputDecoration(labelText: 'Email'),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Email is Required';
-        }
+  Future _openFileExplorer() async {
+    _files = (await FilePicker.platform.pickFiles(
+            type: FileType.any, allowMultiple: false, allowedExtensions: null))!
+        .files;
 
-        if (!RegExp(
-                r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
-            .hasMatch(value)) {
-          return 'Please enter a valid email Address';
-        }
-
-        return null;
-      },
-      onSaved: (value) {
-        _email = value;
-      },
-    );
+    print('Loaded file path is : ${_files!.first.path}');
   }
+
+  // String _mySelection;
+  // List<Map> _myJson = [
+  //   {"id": 0, "name": "<New>"},
+  //   {"id": 1, "name": "Test Practice"}
+  // ];
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
-        key: _formKey,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: _buildName(),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: _buildEmail(),
+            child: TextFormField(
+              controller: nameController,
+              decoration: InputDecoration(
+                border: UnderlineInputBorder(),
+                labelText: 'Enter your Name',
+              ),
+            ),
           ),
           SizedBox(height: 20),
           Padding(
-              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-              child: ElevatedButton(
-                style: style,
-                onPressed: _openFileExplorer,
-                child: Text('Select File'),
-              )),
+            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+            child: IconButton(
+              icon: Icon(Icons.document_scanner),
+              onPressed: _openFileExplorer,
+            ),
+          ),
           SizedBox(height: 30),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -174,14 +138,7 @@ class _HomePageState extends State<HomePage> {
                     style: style,
                     child: Text('Save Data'),
                     onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        return;
-                      }
-
-                      _formKey.currentState!.save();
-                      print(_name);
-                      print(_email);
-                      print(_files);
+                      uploadFile();
                     },
                   ),
                 ),
@@ -244,34 +201,17 @@ class _SecondPageState extends State<SecondPage> {
     'Green'
   ];
 
-  final myController = TextEditingController();
-
-  @override
-  void dispose() {
-    // Clean up the controller when the widget is disposed.
-    myController.dispose();
-    super.dispose();
+  TextEditingController SearchController = TextEditingController();
+  Future personData() async {
+    var url = "http://192.168.0.101/doc_uploaded_backend/viewData.php";
+    var response = await http.get(Uri.parse(url));
+    return json.decode(response.body);
   }
 
-  Widget searchParams() {
-    return TextFormField(
-      decoration: InputDecoration(
-        border: OutlineInputBorder(),
-        hintText: 'Enter a search term',
-      ),
-      controller: myController,
-      validator: (String? value) {
-        if (value == null || value.isEmpty) {
-          return 'Search Parameter is None';
-        }
-
-        return null;
-      },
-      onSaved: (String? value) {
-        // _name = value;
-        print(value);
-      },
-    );
+  @override
+  void initState() {
+    super.initState();
+    personData();
   }
 
   @override
@@ -281,8 +221,15 @@ class _SecondPageState extends State<SecondPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: searchParams()),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+            child: TextFormField(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Enter a search term',
+              ),
+              controller: SearchController,
+            ),
+          ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
             child: ElevatedButton(
@@ -292,7 +239,7 @@ class _SecondPageState extends State<SecondPage> {
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      title: Text(myController.text),
+                      title: Text(SearchController.text),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, 'OK'),
