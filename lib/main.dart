@@ -44,13 +44,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // String _name;
+  // final String _name;
+  // final String _email;
+  var _name;
+  var _email;
 
   final ButtonStyle style =
       ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
 
   final GlobalKey<ScaffoldState> _scaffoldstate =
       new GlobalKey<ScaffoldState>();
+  final _formKey = GlobalKey<FormState>();
 
   List<PlatformFile>? _files;
 
@@ -95,7 +99,7 @@ class _HomePageState extends State<HomePage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  Widget userNameParam() {
+  Widget _buildName() {
     return TextFormField(
       decoration: InputDecoration(
         border: UnderlineInputBorder(),
@@ -109,8 +113,30 @@ class _HomePageState extends State<HomePage> {
         return null;
       },
       onSaved: (String? value) {
-        // _name = value;
-        print(value);
+        _name = value;
+        // print(value);
+      },
+    );
+  }
+
+  Widget _buildEmail() {
+    return TextFormField(
+      decoration: InputDecoration(labelText: 'Email'),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Email is Required';
+        }
+
+        if (!RegExp(
+                r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+            .hasMatch(value)) {
+          return 'Please enter a valid email Address';
+        }
+
+        return null;
+      },
+      onSaved: (value) {
+        _email = value;
       },
     );
   }
@@ -119,25 +145,26 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
+        key: _formKey,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: userNameParam()),
-          const SizedBox(height: 30),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+            child: _buildName(),
+          ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-            child: Expanded(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+            child: _buildEmail(),
+          ),
+          SizedBox(height: 20),
+          Padding(
+              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
               child: ElevatedButton(
                 style: style,
                 onPressed: _openFileExplorer,
-                child: Text('Upload File'),
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 15,
-          ),
+                child: Text('Select File'),
+              )),
+          SizedBox(height: 30),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
             child: Row(
@@ -145,8 +172,17 @@ class _HomePageState extends State<HomePage> {
                 Expanded(
                   child: ElevatedButton(
                     style: style,
-                    onPressed: _openFileExplorer,
                     child: Text('Save Data'),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        return;
+                      }
+
+                      _formKey.currentState!.save();
+                      print(_name);
+                      print(_email);
+                      print(_files);
+                    },
                   ),
                 ),
               ],
