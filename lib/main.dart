@@ -83,9 +83,9 @@ class _HomePageState extends State<HomePage> {
         'file', _files!.first.path.toString()));
     var response = await request.send();
     if (response.statusCode == 200) {
-      _showSnackBar("Image Uploaded");
+      _showSnackBar("Image Uploaded ${nameController.text}");
     } else {
-      _showSnackBar('Something went wrong!');
+      _showSnackBar('Something went wrong! ${nameController.text}');
     }
     setState(() {});
   }
@@ -97,12 +97,6 @@ class _HomePageState extends State<HomePage> {
 
     print('Loaded file path is : ${_files!.first.path}');
   }
-
-  // String _mySelection;
-  // List<Map> _myJson = [
-  //   {"id": 0, "name": "<New>"},
-  //   {"id": 1, "name": "Test Practice"}
-  // ];
 
   @override
   Widget build(BuildContext context) {
