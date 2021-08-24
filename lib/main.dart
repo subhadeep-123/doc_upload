@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -252,6 +253,42 @@ class _ListDataPageState extends State<ListDataPage> {
     }
   }
 
+  void _showSnackBar(String msg) {
+    final snackBar = SnackBar(
+      content: Text(
+        msg,
+        style: TextStyle(color: Colors.black),
+      ),
+      backgroundColor: Colors.blue[300],
+      behavior: SnackBarBehavior.floating,
+      duration: const Duration(seconds: 2),
+      action: SnackBarAction(
+          label: 'Done',
+          textColor: Colors.black,
+          onPressed: () {
+            print('Done pressed!');
+          }),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  Future<void> _launchInBrowser(String filename) async {
+    var url = 'http://192.168.0.101/file/view/$filename';
+    print(url);
+    if (await canLaunch(url)) {
+      await launch(
+        url,
+        forceSafariVC: false,
+        forceWebView: false,
+        headers: <String, String>{'header_key': 'header_value'},
+      );
+    } else {
+      _showSnackBar('Cannot Open. $filename');
+      throw 'Could not launch $url';
+    }
+  }
+
   @override
   void initState() {
     fetchData();
@@ -274,11 +311,14 @@ class _ListDataPageState extends State<ListDataPage> {
             itemCount: listResponse.length,
             itemBuilder: (BuildContext context, int index) {
               return ListTile(
-                title: Text(listResponse[index]),
-                onTap: () {
-                  Navigator.pop(context, listResponse[index]);
-                },
-              );
+                  leading: IconButton(
+                    icon: Icon(Icons.download),
+                    onPressed: () {
+                      var filename = listResponse[index];
+                      _launchInBrowser(filename);
+                    },
+                  ),
+                  title: Text(listResponse[index]));
             },
           ),
         ),
