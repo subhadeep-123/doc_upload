@@ -1,6 +1,6 @@
 import os
 from flask_restful import Resource, Api
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory, current_app
 
 # Internal Imports
 from database import *
@@ -16,7 +16,6 @@ api = Api(app)
 app.logger.setLevel(10)
 
 # create_table()
-
 
 def write_file(data, filename):
     path = os.path.join('UPLOADS', filename)
@@ -51,6 +50,24 @@ class FetchAllData(Resource):
     def get(self):
         allData = showAll()
         return jsonify(allData)
+
+
+@api.resource('/file/view/<filename>')
+class DisplayAllFile(Resource):
+    def get(self, filename):
+        uploads = os.path.join(current_app.root_path,
+                               app.config['UPLOAD_FOLDER'])
+        app.logger.info(uploads)
+        return send_from_directory(uploads, filename)
+
+
+@api.resource('/file/download/<filename>')
+class DownloadFile(Resource):
+    def get(self, filename):
+        uploads = os.path.join(current_app.root_path,
+                               app.config['UPLOAD_FOLDER'])
+        app.logger.info(uploads)
+        return send_from_directory(uploads, filename, as_attachment=True)
 
 
 if __name__ == '__main__':
